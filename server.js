@@ -1,6 +1,6 @@
 var express = require('express')
 var app = express();
-var restapi = express();
+var app = express();
 
 app.configure(function () {
     app.use(express.logger('dev'));
@@ -21,23 +21,23 @@ db.serialize(function() {
     db.run("INSERT INTO usertb (name, year, major) VALUES (?, ?, ?)", "ninad limaye", 2016, "information assurance");
 });
 
-restapi.get('/users', function(req, res, next) {
-   db.all("SELECT * FROM usertb", function(err, row){
-	if (err!== null) {
-	   next(err);
-	}
-	else {
-	console.log(row);
-        res.json({ "name": row.name, "year": row.year, "major": row.major });
-	res.send(200, html);
-	}
- });
+app.use(express.static('public'));
+
+app.get('/users', function(req, res, next) {
+  db.all("SELECT * FROM usertb", function(err, rows){
+  	if (err!== null) {
+  	  next(err);
+  	} else {
+  	  res.send(rows);
+  	}
+  });
 });
 
-restapi.post('/users',function(req, res, next) {
+app.post('/users',function(req, res, next) {
   name = req.body.name;
   year = req.body.year;
   major = req.body.major;
+  console.log(name, year, major)
   sqlRequest = "INSERT INTO 'usertb' (name, year, major) " +
                "VALUES('" + name + "', '" + year + "', '" + major + "')"
   db.run(sqlRequest, function(err) {
@@ -45,7 +45,7 @@ restapi.post('/users',function(req, res, next) {
       next(err);
     }
     else {
-      res.redirect('back');
+      res.send({ name: name, year: year, major: major});
     }
   });
 });
